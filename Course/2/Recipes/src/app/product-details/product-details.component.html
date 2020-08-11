@@ -1,0 +1,18 @@
+<button class="btn btn-primary" (click)="onButtonClick()">
+	Display details
+</button>
+<p *ngIf="buttonClicked">
+	Secret password = 'tuna'
+</p>
+<p [ngStyle]="{backgroundColor:getColour()}" [ngClass]="{future: checkNumberOfClicks()}">
+	Log: {{clicks}}
+</p>
+<div *ngFor="let click of clicksArray" [ngStyle]="{backgroundColor: click >= 5 ? 'lightskyblue' : 'transparent'}"
+	[ngClass]="{'white-text': click >=5}">
+	{{click}}
+</div>
+
+<div *ngFor="let date of datesArray; let i = index" [ngStyle]="{backgroundColor: i >= 5 ? 'lightskyblue' : 'transparent'}"
+	[ngClass]="{'white-text': i >=5}">
+	{{date}}
+</div>

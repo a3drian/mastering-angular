@@ -1,0 +1,11 @@
+<app-header (clickedLink)='onSelectedLink($event)'></app-header>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<app-recipe *ngIf="clickedLink === 'recipe'; else shopping"></app-recipe>
+		</div>
+		<ng-template #shopping>
+			<app-shopping-list></app-shopping-list>
+		</ng-template>
+	</div>
+</div>

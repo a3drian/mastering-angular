@@ -1,0 +1,11 @@
+<div>
+	<div class="col-md-5">
+		<recipe-list (selectedRecipe)="onSelectedRecipe($event)"></recipe-list>
+	</div>
+	<div class="col-md-7">
+		<recipe-detail *ngIf="checkIfSelected(); else infoText" [recipe]="selectedRecipe"></recipe-detail>
+		<ng-template #infoText>
+			<p>Please select a recipe!</p>
+		</ng-template>
+	</div>
+</div>

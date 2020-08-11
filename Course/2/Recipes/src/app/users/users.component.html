@@ -1,0 +1,10 @@
+<!-- Practicing Data Binding -->
+<p>Practicing Data Binding</p>
+
+<p>Users Component</p>
+<input type="text" class="form-control" [(ngModel)]="username">
+<p>Form input: {{username}}</p>
+
+<button class="btn btn-primary" [disabled]="checkValidUsername()" (click)="onButtonClick()">
+	Reset username
+</button>
