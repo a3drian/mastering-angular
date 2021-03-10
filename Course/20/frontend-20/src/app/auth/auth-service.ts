@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Subject, throwError } from "rxjs";
+import { Router } from "@angular/router";
+import { BehaviorSubject, throwError } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 
 import { User } from './user.model';
@@ -22,7 +23,13 @@ export class AuthService {
 	// user = new Subject<User>();
 	user = new BehaviorSubject<User>(null);
 
-	constructor(private http: HttpClient) { }
+	private readonly USER_DATA_KEY = 'userData';
+	private tokenExpirationTimer: any;
+
+	constructor(
+		private http: HttpClient,
+		private router: Router
+	) { }
 
 	signUp(email: string, password: string) {
 		// sends request to Firebase required endpoint for signing users up
@@ -70,6 +77,57 @@ export class AuthService {
 			);
 	}
 
+	logout() {
+		this.user.next(null);
+		localStorage.removeItem(this.USER_DATA_KEY);
+		if (this.tokenExpirationTimer) {
+			clearTimeout(this.tokenExpirationTimer);
+		}
+		this.tokenExpirationTimer = null;
+		this.router.navigate(['/auth']);
+	}
+
+	autoLogin() {
+
+		console.log('Called autoLogin()');
+
+		const userData: {
+			email: string;
+			id: string;
+			_token: string;
+			_tokenExpirationDate: string
+		} = JSON.parse(localStorage.getItem(this.USER_DATA_KEY));
+
+		if (!userData) {
+			return;
+		}
+
+		const loadedUser = new User(
+			userData.email,
+			userData.id,
+			userData._token,
+			new Date(userData._tokenExpirationDate)
+		);
+
+		if (!loadedUser.token) {
+			return;
+		}
+
+		this.user.next(loadedUser);
+
+		const remainingTokenTime = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
+		this.autoLogout(remainingTokenTime);
+	}
+
+	autoLogout(expirationDuration: number) {
+		// amount of ms before token is invalid
+		console.log(`expirationDuration: ${expirationDuration}`);
+		this.tokenExpirationTimer = setTimeout(
+			() => { this.logout() },
+			expirationDuration
+		);
+	}
+
 	private handleError(errorResponse: HttpErrorResponse) {
 		let errorMessage = 'An unknown error occurred!';
 		// in case there is a network error and not Firebase error
@@ -101,5 +159,7 @@ export class AuthService {
 			expirationDate
 		);
 		this.user.next(user);
+		this.autoLogout(responseData.expiresIn * 1000);
+		localStorage.setItem(this.USER_DATA_KEY, JSON.stringify(user));
 	}
 }
