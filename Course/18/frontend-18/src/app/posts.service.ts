@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 
 import { Post } from './post.model';
@@ -21,7 +21,10 @@ export class PostsService {
         this.http
             .post<{ name: String }>(
                 `${this.baseURL + 'posts.json'}`,
-                postData
+                postData,
+                // {
+                //     observe: 'response'
+                // }
             )
             .subscribe(
                 responseData => {
@@ -34,8 +37,24 @@ export class PostsService {
     }
 
     fetchPosts() {
+
+        let searchParams = new HttpParams();
+        searchParams = searchParams.append('print', 'pretty');
+        searchParams = searchParams.append('name', 'adrian');
+
         return this.http
-            .get<{ [key: string]: Post }>(`${this.baseURL + 'posts.json'}`)
+            .get<{ [key: string]: Post }>(
+                `${this.baseURL + 'posts.json'}`,
+                {
+                    headers: new HttpHeaders(
+                        {
+                            "Custom-Header": "Hello"
+                        }
+                    ),
+                    // params: new HttpParams().set('print', 'pretty')
+                    params: searchParams
+                }
+            )
             .pipe(
                 // map((responseData: { [key: string]: Post }) => { // because we put <{ [key: string]: Post }>
                 map(responseData => {
